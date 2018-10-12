@@ -6,15 +6,15 @@ from . import loss
 
 class Network(object):
 
-    def __init__(self, dims, activation=activation.sigmoid, cost=loss.mean_squared_error):
+    def __init__(self, dims, activation=activation.Sigmoid, cost=loss.MSE):
         # Initialize (zero) weights and biases based on the dimensions.
         self.weights = [np.zeros((dims[i-1], dims[i])) for i in range(1, len(dims))]
         self.biases = [np.zeros(dim) for dim in dims]
         self.biases = self.biases[1:]  # The first layer is the input layer, so it doesn't need a bias
 
         # Initialize activation and cost functions.
-        self.activation = activation
-        self.cost = cost
+        self.activation = activation()
+        self.cost = cost()
 
     def predict(self, X):
         """
@@ -42,16 +42,57 @@ class Network(object):
             # Take a sample of size batch_size from the training data.
             sample = np.random.sample(training_data, size=batch_size, replace=False)
 
-            predictions = self.predict([training[0] for training in sample])
+            features = [training[0] for training in sample]
+            targets = [training[1] for training in sample]
 
-            gradient = self.calculate_gradient(predictions, [pair[1] for pair in sample])
+            # Compute the gradient.
+            delta_w, delta_b = self.backprop(features, targets)
 
-            # Update weights based on the gradient.
+            # Update weights and biases based on the gradient.
+            self.weights += delta_w
+            self.biases += delta_b
 
-            # Update biases based on the gradient.
-
-    def calculate_gradient(self, predictions, labels):
+    def backprop(self, X, Y):
         """
-        Find the gradient matrix given the predictions and labels.
+        Calculate the gradient for a network.
+
+        :param features: Training examples.
+        :param labels:   Expected output for each feature.
+
+        :return: Tuple of (delta_w, delta_b), the gradients for the weights and biases,
+                 respectively.
         """
-        pass
+        # Initialize output layer activation to the input layer.
+        aL = X
+
+        # Initialize variables for keeping track of inputs and activations to
+        # each layer as we iterate through the network.
+        a, z = [aL], []
+
+        # Compute inputs and activations for each layer.
+        for wl, bl in zip(self.weights, self.biases):
+            zl = np.dot(wl, aL) + bl
+            aL = sigma(zl)
+
+            a.append(aL)
+            z.append(zl)
+
+        output_error = self.cost.nabla_C(a[-1], labels) * self.activation.ddz(z[-1])  # BP1
+
+        # Initialize outputs
+        delta_w = [np.zeros(wi.shape) for wi in self.weights]
+        delta_b = [np.zeros(bi.shape) for bi in self.biases]
+
+        # Set the gradient for the output layer
+        delta_b[-1] = output_error  # BP3
+        delta_w[-1] = aL * output_error  # BP4
+
+        # Backwards pass
+        for i in range(len(self.weights)-1, 0, -1):
+            output_error = (np.dot(np.transpose(self.weights[i]), output_error) *
+                            self.activation.ddz(z[i-1]))  # BP2
+
+            b_prime = output_error
+            w_prime = a[i-1] * output_error
+
+        return delta_w, delta_b

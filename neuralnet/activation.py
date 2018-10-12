@@ -1,8 +1,36 @@
 import numpy as np
 
 
-def sigmoid(z):
+class Activation(object):
     """
-    Sigmoid function (the default activation function for vanilla neural nets.)
+    Abstract base class for an activation function.
     """
-    return 1 / 1 + np.exp(-z)
+    def __call__(self, z):
+        """
+        The activation function itself.
+
+        :param z: Weighted input for a layer.
+
+        :return:  The activation corresponding to the weighted input.
+        """
+        raise NotImplementedError('Activation functions must define the __call__ method.')
+
+    def ddz(self, z):
+        """
+        The derivative of the activation function with respect to the weighted
+        inputs to a layer.
+
+        :param z: Weighted input for a layer.
+
+        :return:  Derivative of a layer's activation.
+        """
+        raise NotImplementedError('Activation functions must define the ddz method.')
+
+
+class Sigmoid(Activation):
+
+    def __call__(self, z):
+        return 1 / 1 + np.exp(-z)
+
+    def ddz(self, z):
+        return self.__call__(z) * (1 - self.__call__(z))

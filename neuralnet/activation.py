@@ -30,7 +30,7 @@ class Activation(object):
 class Sigmoid(Activation):
 
     def __call__(self, z):
-        return 1 / 1 + np.exp(-z)
+        return 1 / (1 + np.exp(-z))
 
     def ddz(self, z):
         return self.__call__(z) * (1 - self.__call__(z))

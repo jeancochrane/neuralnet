@@ -16,7 +16,7 @@ class Network(object):
 
         # Initialize activation and cost functions.
         self.activation = activation()
-        self.cost = cost()
+        self.cost = cost(activation)
 
     def predict(self, X):
         """
@@ -80,7 +80,7 @@ class Network(object):
             a.append(aL)
             z.append(zl)
 
-        output_error = self.cost.nabla_C(a[-1], Y) * self.activation.ddz(z[-1])  # BP1
+        output_error = self.cost.delta(z[-1], a[-1], Y)
 
         # Initialize outputs
         delta_w = [np.zeros(wi.shape) for wi in self.weights]

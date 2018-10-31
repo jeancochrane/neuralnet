@@ -10,8 +10,9 @@ class Network(object):
 
     def __init__(self, dims, activation=activation.Sigmoid, cost=loss.MSE):
         # Initialize (zero) weights and biases based on the dimensions.
-        self.weights = [np.zeros((dims[i-1], dims[i])) for i in range(1, len(dims))]
-        self.biases = [np.zeros(dim) for dim in dims]
+        self.weights = [np.random.standard_normal((dims[i-1], dims[i]))/np.sqrt(dims[i-1])
+                        for i in range(1, len(dims))]
+        self.biases = [np.random.standard_normal(dim) for dim in dims]
         self.biases = self.biases[1:]  # The first layer is the input layer, so it doesn't need a bias
 
         # Initialize activation and cost functions.

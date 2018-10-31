@@ -36,7 +36,6 @@ class Network(object):
         return Y
 
     def train(self, X, Y, batch_size=1, num_epochs=100, learning_rate=0.01):
-
         """
         Train the model.
         """
@@ -100,3 +99,23 @@ class Network(object):
             w_prime = a[i] * output_error
 
         return delta_w, delta_b
+
+    def evaluate(self, X, Y):
+        """
+        Evaluate the model on a set of test or validation data (X and Y),
+        returning a set of metrics.
+        """
+        val_pairs = list(zip(X, Y))
+
+        # Output metrics.
+        metrics = {}
+
+        losses = []
+        for x, y in val_pairs:
+            prediction = self.predict(x)
+            loss = self.cost(prediction, y)
+            losses.append(loss)
+
+        metrics['mean_loss'] = np.mean(np.array(losses))
+
+        return metrics

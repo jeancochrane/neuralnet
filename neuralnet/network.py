@@ -3,21 +3,21 @@ import random
 import numpy as np
 
 from . import activation
-from . import loss
+from . import loss as lss  # Avoid name collision with the eponymous kwarg.
 
 
 class Network(object):
 
-    def __init__(self, dims, activation=activation.Sigmoid, cost=loss.MSE):
+    def __init__(self, dims, activation=activation.Sigmoid, loss=lss.MSE):
         # Initialize (zero) weights and biases based on the dimensions.
         self.weights = [np.random.standard_normal((dims[i-1], dims[i]))/np.sqrt(dims[i-1])
                         for i in range(1, len(dims))]
         self.biases = [np.random.standard_normal(dim) for dim in dims]
         self.biases = self.biases[1:]  # The first layer is the input layer, so it doesn't need a bias
 
-        # Initialize activation and cost functions.
+        # Initialize activation and loss functions.
         self.activation = activation()
-        self.cost = cost(activation)
+        self.loss = loss(activation)
 
     def predict(self, X):
         """
@@ -80,7 +80,7 @@ class Network(object):
             a.append(aL)
             z.append(zl)
 
-        output_error = self.cost.delta(z[-1], a[-1], Y)
+        output_error = self.loss.delta(z[-1], a[-1], Y)
 
         # Initialize outputs
         delta_w = [np.zeros(wi.shape) for wi in self.weights]
@@ -113,7 +113,7 @@ class Network(object):
         losses = []
         for x, y in val_pairs:
             prediction = self.predict(x)
-            loss = self.cost(prediction, y)
+            loss = self.loss(prediction, y)
             losses.append(loss)
 
         metrics['mean_loss'] = np.mean(np.array(losses))

@@ -34,3 +34,14 @@ class TestNetwork(unittest.TestCase):
     def test_train(self):
         net = Network((4, 5, 1))
         net.train([np.array([1, 2, 3, 4])], [np.array([1.])])
+
+    def test_train_batch_size(self):
+        net = Network((4, 5, 1))
+
+        x_train = [[1, 2, 3, 4], [5, 6, 7, 8]]
+        y_train = [1, 0]
+
+        x_train, y_train = np.array(x_train), np.array(y_train)
+
+        # This shouldn't throw an error
+        net.train(x_train, y_train, batch_size=2)
